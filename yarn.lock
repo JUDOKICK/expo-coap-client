@@ -1682,14 +1682,6 @@ nise@^1.2.0:
     path-to-regexp "^1.7.0"
     text-encoding "^0.6.4"
 
-node-dtls-client@netbeast/react-native-dtls-client:
-  version "0.5.4"
-  resolved "https://codeload.github.com/netbeast/react-native-dtls-client/tar.gz/63596475fbdf44c1cd05025da4728ea596db2e8d"
-  dependencies:
-    react-native-crypto tradle/react-native-crypto
-    react-native-udp "2.1.0"
-    semver "^5.5.0"
-
 normalize-package-data@^2.3.2:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/normalize-package-data/-/normalize-package-data-2.4.0.tgz#12f95a307d58352075a04907b84ac8be98ac012f"
@@ -2018,6 +2010,14 @@ react-native-crypto@tradle/react-native-crypto:
     inherits "^2.0.1"
     pbkdf2 "3.0.8"
     public-encrypt "^4.0.0"
+
+react-native-dtls-client@netbeast/react-native-dtls-client:
+  version "0.5.4"
+  resolved "https://codeload.github.com/netbeast/react-native-dtls-client/tar.gz/63596475fbdf44c1cd05025da4728ea596db2e8d"
+  dependencies:
+    react-native-crypto tradle/react-native-crypto
+    react-native-udp "2.1.0"
+    semver "^5.5.0"
 
 react-native-udp@2.1.0:
   version "2.1.0"
