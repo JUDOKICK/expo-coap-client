@@ -1,17 +1,16 @@
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function fulfilled (value) {try {step(generator.next(value));} catch (e) {reject(e);} }
+        function rejected (value) {try {step(generator["throw"](value));} catch (e) {reject(e);} }
+        function step (result) {result.done ? resolve(result.value) : new P(function (resolve) {resolve(result.value);}).then(fulfilled, rejected);}
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const crypto = require("crypto");
-const dgram = require("dgram");
+Object.defineProperty(exports, "__esModule", {value: true});
+const crypto = require("react-native-crypto");
+const dgram = require("react-native-udp");
 const node_dtls_client_1 = require("node-dtls-client");
-const querystring = require("querystring");
 const nodeUrl = require("url");
 const ContentFormats_1 = require("./ContentFormats");
 const DeferredPromise_1 = require("./lib/DeferredPromise");
@@ -19,19 +18,12 @@ const Origin_1 = require("./lib/Origin");
 const SocketWrapper_1 = require("./lib/SocketWrapper");
 const Message_1 = require("./Message");
 const Option_1 = require("./Option");
-// initialize debugging
-const debugPackage = require("debug");
-const LogMessage_1 = require("./lib/LogMessage");
-const debug = debugPackage("node-coap-client");
-// print version info
-// tslint:disable-next-line:no-var-requires
-const npmVersion = require("../package.json").version;
-debug(`CoAP client version ${npmVersion}`);
-function urlToString(url) {
+
+function urlToString (url) {
     return `${url.protocol}//${url.hostname}:${url.port}${url.pathname}`;
 }
 class PendingRequest {
-    constructor(initial) {
+    constructor (initial) {
         if (!initial)
             return;
         this.connection = initial.connection;
@@ -44,16 +36,16 @@ class PendingRequest {
         this.observe = initial.observe;
         this._concurrency = initial.concurrency;
     }
-    set concurrency(value) {
+    set concurrency (value) {
         const changed = value !== this._concurrency;
         this._concurrency = value;
         if (changed)
             CoapClient.onConcurrencyChanged(this);
     }
-    get concurrency() {
+    get concurrency () {
         return this._concurrency;
     }
-    queueForRetransmission() {
+    queueForRetransmission () {
         if (this.retransmit != null && typeof this.retransmit.action === "function") {
             this.retransmit.jsTimeout = setTimeout(this.retransmit.action, this.retransmit.timeout);
         }
@@ -68,7 +60,7 @@ const RETRANSMISSION_PARAMS = {
 const TOKEN_LENGTH = 4;
 /** How many concurrent messages are allowed. Should be 1 */
 const MAX_CONCURRENCY = 1;
-function incrementToken(token) {
+function incrementToken (token) {
     const len = token.length;
     const ret = Buffer.alloc(len, token);
     for (let i = len - 1; i >= 0; i--) {
@@ -83,10 +75,10 @@ function incrementToken(token) {
     }
     return ret;
 }
-function incrementMessageID(msgId) {
+function incrementMessageID (msgId) {
     return (++msgId > 0xffff) ? 1 : msgId;
 }
-function validateBlockSize(size) {
+function validateBlockSize (size) {
     // block size is represented as 2**(4 + X) where X is an integer from 0..6
     const exp = Math.log2(size) - 4;
     // is the exponent an integer?
@@ -103,7 +95,7 @@ function validateBlockSize(size) {
  * Normalizes a hostname so it matches between `setSecurityParameters` and `connect`
  * @param hostname The hostname to normalize
  */
-function normalizeHostname(hostname) {
+function normalizeHostname (hostname) {
     // make sure noone gave us a full URI
     if (!hostname.startsWith("coap://") && !hostname.startsWith("coaps://")) {
         hostname = `coaps://${hostname}`;
@@ -117,7 +109,7 @@ class CoapClient {
     /**
      * Sets the security params to be used for the given hostname
      */
-    static setSecurityParams(hostname, params) {
+    static setSecurityParams (hostname, params) {
         hostname = normalizeHostname(hostname);
         CoapClient.dtlsParams.set(hostname, params);
     }
@@ -125,7 +117,7 @@ class CoapClient {
      * Sets the default options for requests
      * @param defaults The default options to use for requests when no options are given
      */
-    static setDefaultRequestOptions(defaults) {
+    static setDefaultRequestOptions (defaults) {
         if (defaults.confirmable != null)
             this.defaultRequestOptions.confirmable = defaults.confirmable;
         if (defaults.keepAlive != null)
@@ -139,7 +131,7 @@ class CoapClient {
             this.defaultRequestOptions.preferredBlockSize = defaults.preferredBlockSize;
         }
     }
-    static getRequestOptions(options) {
+    static getRequestOptions (options) {
         // ensure we have options and set the default params
         options = options || {};
         if (options.confirmable == null)
@@ -163,8 +155,8 @@ class CoapClient {
      * @param originOrHostname - Origin (protocol://hostname:port) or Hostname to reset,
      * omit to reset all connections
      */
-    static reset(originOrHostname) {
-        debug(`reset(${originOrHostname || ""})`);
+    static reset (originOrHostname) {
+        console.log(`reset(${originOrHostname || ""})`);
         let predicate;
         if (originOrHostname != null) {
             if (typeof originOrHostname === "string") {
@@ -190,9 +182,9 @@ class CoapClient {
             // and forget it if so
             if (request.promise != null)
                 request.promise.reject("CoapClient was reset");
-            CoapClient.forgetRequest({ request });
+            CoapClient.forgetRequest({request});
         }
-        debug(`${Object.keys(CoapClient.pendingRequestsByMsgID).length} pending requests remaining...`);
+        console.log(`${Object.keys(CoapClient.pendingRequestsByMsgID).length} pending requests remaining...`);
         // cancel all pending connections matching the predicate
         for (const [originString, connection] of CoapClient.pendingConnections) {
             if (!predicate(originString))
@@ -200,18 +192,18 @@ class CoapClient {
             connection.reject("CoapClient was reset");
             CoapClient.pendingConnections.delete(originString);
         }
-        debug(`${Object.keys(CoapClient.pendingConnections).length} pending connections remaining...`);
+        console.log(`${Object.keys(CoapClient.pendingConnections).length} pending connections remaining...`);
         // forget all connections matching the predicate
         for (const [originString, connection] of CoapClient.connections) {
             if (!predicate(originString))
                 continue;
-            debug(`closing connection to ${originString}`);
+            console.log(`closing connection to ${originString}`);
             if (connection.socket != null) {
                 connection.socket.close();
             }
             CoapClient.connections.delete(originString);
         }
-        debug(`${Object.keys(CoapClient.connections).length} active connections remaining...`);
+        console.log(`${Object.keys(CoapClient.connections).length} active connections remaining...`);
     }
     /**
      * Requests a CoAP resource
@@ -220,11 +212,11 @@ class CoapClient {
      * @param payload - The optional payload to be attached to the request
      * @param options - Various options to control the request.
      */
-    static request(url, method, payload, options) {
+    static request (url, method, payload, options) {
         return __awaiter(this, void 0, void 0, function* () {
             // parse/convert url
             if (typeof url === "string") {
-                url = nodeUrl.parse(url);
+                url = nodeUrl.parse(url, true);
             }
             // ensure we have options and set the default params
             options = this.getRequestOptions(options);
@@ -254,9 +246,8 @@ class CoapClient {
             // [15] query
             if (url.query != null) {
                 // unescape and split the querystring
-                const queryParts = querystring.parse(url.query);
-                for (const key of Object.keys(queryParts)) {
-                    const part = queryParts[key];
+                for (const key of Object.keys(url.query)) {
+                    const part = url.query[key];
                     if (Array.isArray(part)) {
                         msgOptions.push(...part.map(value => Option_1.Options.UriQuery(`${key}=${value}`)));
                     }
@@ -301,7 +292,7 @@ class CoapClient {
      * Creates a RetransmissionInfo to use for retransmission of lost packets
      * @param messageId The message id of the corresponding request
      */
-    static createRetransmissionInfo(messageId) {
+    static createRetransmissionInfo (messageId) {
         return {
             timeout: CoapClient.getRetransmissionInterval(),
             action: () => CoapClient.retransmit(messageId),
@@ -314,7 +305,7 @@ class CoapClient {
      * @param target - The target to be pinged. Must be a string, NodeJS.Url or Origin and has to contain the protocol, host and port.
      * @param timeout - (optional) Timeout in ms, after which the ping is deemed unanswered. Default: 5000ms
      */
-    static ping(target, timeout = 5000) {
+    static ping (target, timeout = 5000) {
         return __awaiter(this, void 0, void 0, function* () {
             // parse/convert url
             if (typeof target === "string") {
@@ -369,7 +360,7 @@ class CoapClient {
             finally {
                 // cleanup
                 clearTimeout(failTimeout);
-                CoapClient.forgetRequest({ request: req });
+                CoapClient.forgetRequest({request: req});
             }
             return success;
         });
@@ -378,9 +369,9 @@ class CoapClient {
      * Re-Sends a message in case it got lost
      * @param msgID
      */
-    static retransmit(msgID) {
+    static retransmit (msgID) {
         // find the request with all the information
-        const request = CoapClient.findRequest({ msgID });
+        const request = CoapClient.findRequest({msgID});
         if (request == null || request.retransmit == null)
             return;
         // are we over the limit?
@@ -390,10 +381,10 @@ class CoapClient {
                 request.promise.reject("Retransmit counter exceeded");
             }
             // then stop retransmitting and forget the request
-            CoapClient.forgetRequest({ request });
+            CoapClient.forgetRequest({request});
             return;
         }
-        debug(`retransmitting message ${msgID.toString(16)}, try #${request.retransmit.counter + 1}`);
+        console.log(`retransmitting message ${msgID.toString(16)}, try #${request.retransmit.counter + 1}`);
         // resend the message
         CoapClient.send(request.connection, request.originalMessage, "immediate");
         // and increase the params
@@ -401,11 +392,11 @@ class CoapClient {
         request.retransmit.timeout *= 2;
         request.queueForRetransmission();
     }
-    static getRetransmissionInterval() {
+    static getRetransmissionInterval () {
         return Math.round(1000 /*ms*/ * RETRANSMISSION_PARAMS.ackTimeout *
             (1 + Math.random() * (RETRANSMISSION_PARAMS.ackRandomFactor - 1)));
     }
-    static stopRetransmission(request) {
+    static stopRetransmission (request) {
         if (request.retransmit == null)
             return;
         clearTimeout(request.retransmit.jsTimeout);
@@ -415,7 +406,7 @@ class CoapClient {
      * When the server responds with block-wise responses, this requests the next block.
      * @param request The original request which resulted in a block-wise response
      */
-    static requestNextBlock(request) {
+    static requestNextBlock (request) {
         const message = request.originalMessage;
         const connection = request.connection;
         // requests for the next block are a new message with a new message id
@@ -430,7 +421,7 @@ class CoapClient {
         let block2Opt = Option_1.findOption(message.options, "Block2");
         if (block2Opt == null) {
             // respect the response options and request the next block
-            const { blockNumber, blockSize } = Option_1.findOption(request.partialResponse.options, "Block2");
+            const {blockNumber, blockSize} = Option_1.findOption(request.partialResponse.options, "Block2");
             block2Opt = Option_1.Options.Block2(blockNumber + 1, true, blockSize);
             message.options.push(block2Opt);
         }
@@ -451,11 +442,11 @@ class CoapClient {
      * @param payload - The optional payload to be attached to the request
      * @param options - Various options to control the request.
      */
-    static observe(url, method, callback, payload, options) {
+    static observe (url, method, callback, payload, options) {
         return __awaiter(this, void 0, void 0, function* () {
             // parse/convert url
             if (typeof url === "string") {
-                url = nodeUrl.parse(url);
+                url = nodeUrl.parse(url, true);
             }
             // ensure we have options and set the default params
             options = this.getRequestOptions(options);
@@ -524,31 +515,30 @@ class CoapClient {
     /**
      * Stops observation of the given url
      */
-    static stopObserving(url) {
+    static stopObserving (url) {
         // parse/convert url
         if (typeof url === "string") {
-            url = nodeUrl.parse(url);
+            url = nodeUrl.parse(url, true);
         }
         // normalize the url
         const urlString = urlToString(url);
         // and forget the request if we have one remembered
-        CoapClient.forgetRequest({ url: urlString });
+        CoapClient.forgetRequest({url: urlString});
     }
-    static onMessage(origin, message, rinfo) {
+    static onMessage (origin, message, rinfo) {
         // parse the CoAP message
         const coapMsg = Message_1.Message.parse(message);
-        LogMessage_1.logMessage(coapMsg);
         if (coapMsg.code.isEmpty()) {
             // ACK or RST
             // see if we have a request for this message id
-            const request = CoapClient.findRequest({ msgID: coapMsg.messageId });
+            const request = CoapClient.findRequest({msgID: coapMsg.messageId});
             if (request != null) {
                 // reduce the request's concurrency, since it was handled on the server
                 request.concurrency = 0;
                 // handle the message
                 switch (coapMsg.type) {
                     case Message_1.MessageType.ACK:
-                        debug(`received ACK for message 0x${coapMsg.messageId.toString(16)}, stopping retransmission...`);
+                        console.log(`received ACK for message 0x${coapMsg.messageId.toString(16)}, stopping retransmission...`);
                         // the other party has received the message, stop resending
                         CoapClient.stopRetransmission(request);
                         break;
@@ -556,13 +546,13 @@ class CoapClient {
                         if (request.originalMessage.type === Message_1.MessageType.CON &&
                             request.originalMessage.code === Message_1.MessageCodes.empty) { // this message was a ping (empty CON, answered by RST)
                             // resolve the promise
-                            debug(`received response to ping with ID 0x${coapMsg.messageId.toString(16)}`);
+                            console.log(`received response to ping with ID 0x${coapMsg.messageId.toString(16)}`);
                             request.promise.resolve();
                         }
                         else {
                             // the other party doesn't know what to do with the request, forget it
-                            debug(`received RST for message 0x${coapMsg.messageId.toString(16)}, forgetting the request...`);
-                            CoapClient.forgetRequest({ request });
+                            console.log(`received RST for message 0x${coapMsg.messageId.toString(16)}, forgetting the request...`);
+                            CoapClient.forgetRequest({request});
                         }
                         break;
                 }
@@ -577,11 +567,11 @@ class CoapClient {
             if (coapMsg.token && coapMsg.token.length) {
                 // this message has a token, check which request it belongs to
                 const tokenString = coapMsg.token.toString("hex");
-                const request = CoapClient.findRequest({ token: tokenString });
+                const request = CoapClient.findRequest({token: tokenString});
                 if (request) {
                     // if the message is an acknowledgement, stop resending
                     if (coapMsg.type === Message_1.MessageType.ACK) {
-                        debug(`received ACK for message 0x${coapMsg.messageId.toString(16)}, stopping retransmission...`);
+                        console.log(`received ACK for message 0x${coapMsg.messageId.toString(16)}, stopping retransmission...`);
                         CoapClient.stopRetransmission(request);
                     }
                     // parse options
@@ -634,11 +624,11 @@ class CoapClient {
                         // resolve the promise
                         request.promise.resolve(response);
                         // after handling one-time requests, delete the info about them
-                        CoapClient.forgetRequest({ request });
+                        CoapClient.forgetRequest({request});
                     }
                     // also acknowledge the packet if neccessary
                     if (coapMsg.type === Message_1.MessageType.CON) {
-                        debug(`sending ACK for message 0x${coapMsg.messageId.toString(16)}`);
+                        console.log(`sending ACK for message 0x${coapMsg.messageId.toString(16)}`);
                         const ACK = CoapClient.createMessage(Message_1.MessageType.ACK, Message_1.MessageCodes.empty, coapMsg.messageId);
                         CoapClient.send(request.connection, ACK, "immediate");
                     }
@@ -650,7 +640,7 @@ class CoapClient {
                     if (CoapClient.connections.has(originString)) {
                         const connection = CoapClient.connections.get(originString);
                         // and send the reset
-                        debug(`sending RST for message 0x${coapMsg.messageId.toString(16)}`);
+                        console.log(`sending RST for message 0x${coapMsg.messageId.toString(16)}`);
                         const RST = CoapClient.createMessage(Message_1.MessageType.RST, Message_1.MessageCodes.empty, coapMsg.messageId);
                         CoapClient.send(connection, RST, "immediate");
                     }
@@ -667,8 +657,8 @@ class CoapClient {
      * @param options
      * @param payload
      */
-    static createMessage(type, code, messageId, token = null, options = [], // do we need this?
-    payload = null) {
+    static createMessage (type, code, messageId, token = null, options = [], // do we need this?
+        payload = null) {
         return new Message_1.Message(0x01, type, code, messageId, token, options, payload);
     }
     /**
@@ -677,27 +667,27 @@ class CoapClient {
      * @param message The message to send
      * @param highPriority Whether the message should be prioritized
      */
-    static send(connection, message, priority = "normal") {
-        const request = CoapClient.findRequest({ msgID: message.messageId });
+    static send (connection, message, priority = "normal") {
+        const request = CoapClient.findRequest({msgID: message.messageId});
         switch (priority) {
             case "immediate": {
                 // Send high-prio messages immediately
                 // This is for ACKs, RSTs and retransmissions
-                debug(`sending high priority message 0x${message.messageId.toString(16)}`);
+                console.log(`sending high priority message 0x${message.messageId.toString(16)}`);
                 CoapClient.doSend(connection, request, message);
                 break;
             }
             case "normal": {
                 // Put the message in the queue
-                CoapClient.sendQueue.push({ connection, message });
-                debug(`added message to the send queue with normal priority, new length = ${CoapClient.sendQueue.length}`);
+                CoapClient.sendQueue.push({connection, message});
+                console.log(`added message to the send queue with normal priority, new length = ${CoapClient.sendQueue.length}`);
                 break;
             }
             case "high": {
                 // Put the message in the queue (in first position)
                 // This is for subsequent requests to blockwise resources
-                CoapClient.sendQueue.unshift({ connection, message });
-                debug(`added message to the send queue with high priority, new length = ${CoapClient.sendQueue.length}`);
+                CoapClient.sendQueue.unshift({connection, message});
+                console.log(`added message to the send queue with high priority, new length = ${CoapClient.sendQueue.length}`);
                 break;
             }
         }
@@ -709,7 +699,7 @@ class CoapClient {
      * @param req The pending request whose concurrency has changed
      * @internal
      */
-    static onConcurrencyChanged(req) {
+    static onConcurrencyChanged (req) {
         // only handle requests with a message (in case there's an edge case without a message)
         const message = req.originalMessage;
         if (message == null)
@@ -717,24 +707,24 @@ class CoapClient {
         // only handle requests we haven't forgotten yet
         if (!CoapClient.pendingRequestsByMsgID.has(message.messageId))
             return;
-        debug(`request 0x${message.messageId.toString(16)}: concurrency changed => ${req.concurrency}`);
+        console.log(`request 0x${message.messageId.toString(16)}: concurrency changed => ${req.concurrency}`);
         if (req.concurrency === 0)
             CoapClient.workOffSendQueue();
     }
-    static workOffSendQueue() {
+    static workOffSendQueue () {
         // check if there are messages to send
         if (CoapClient.sendQueue.length === 0) {
-            debug(`workOffSendQueue > queue empty`);
+            console.log(`workOffSendQueue > queue empty`);
             return;
         }
         // check if we may send a message now
-        debug(`workOffSendQueue > concurrency = ${CoapClient.calculateConcurrency()} (MAX ${MAX_CONCURRENCY})`);
+        console.log(`workOffSendQueue > concurrency = ${CoapClient.calculateConcurrency()} (MAX ${MAX_CONCURRENCY})`);
         if (CoapClient.calculateConcurrency() < MAX_CONCURRENCY) {
             // get the next message to send
-            const { connection, message } = CoapClient.sendQueue.shift();
-            debug(`concurrency low enough, sending message 0x${message.messageId.toString(16)}`);
+            const {connection, message} = CoapClient.sendQueue.shift();
+            console.log(`concurrency low enough, sending message 0x${message.messageId.toString(16)}`);
             // update the request's concurrency (it's now being handled)
-            const request = CoapClient.findRequest({ msgID: message.messageId });
+            const request = CoapClient.findRequest({msgID: message.messageId});
             CoapClient.doSend(connection, request, message);
         }
         // to avoid any deadlocks we didn't think of, re-call this later
@@ -743,7 +733,7 @@ class CoapClient {
     /**
      * Does the actual sending of a message and starts concurrency/retransmission handling
      */
-    static doSend(connection, request, message) {
+    static doSend (connection, request, message) {
         // handle concurrency/retransmission if neccessary
         if (request != null) {
             request.concurrency = 1;
@@ -753,11 +743,11 @@ class CoapClient {
         connection.socket.send(message.serialize(), connection.origin);
     }
     /** Calculates the current concurrency, i.e. how many parallel requests are being handled */
-    static calculateConcurrency() {
+    static calculateConcurrency () {
         return [...CoapClient.pendingRequestsByMsgID.values()] // find all requests
             .map(req => req.concurrency) // extract their concurrency
             .reduce((sum, item) => sum + item, 0) // and sum it up
-        ;
+            ;
     }
     /**
      * Remembers a request for resending lost messages and tracking responses and updates
@@ -766,7 +756,7 @@ class CoapClient {
      * @param byMsgID
      * @param byToken
      */
-    static rememberRequest(request, byUrl = true, byMsgID = true, byToken = true) {
+    static rememberRequest (request, byUrl = true, byMsgID = true, byToken = true) {
         let tokenString = "";
         if (byToken && request.originalMessage.token != null) {
             tokenString = request.originalMessage.token.toString("hex");
@@ -778,7 +768,7 @@ class CoapClient {
         if (byUrl) {
             CoapClient.pendingRequestsByUrl.set(request.url, request);
         }
-        debug(`remembering request: msgID=0x${request.originalMessage.messageId.toString(16)}, token=${tokenString}, url=${request.url}`);
+        console.log(`remembering request: msgID=0x${request.originalMessage.messageId.toString(16)}, token=${tokenString}, url=${request.url}`);
     }
     /**
      * Forgets a pending request
@@ -787,7 +777,7 @@ class CoapClient {
      * @param byMsgID
      * @param byToken
      */
-    static forgetRequest(which) {
+    static forgetRequest (which) {
         // find the request
         const request = which.request || CoapClient.findRequest(which);
         // none found, return
@@ -798,7 +788,7 @@ class CoapClient {
             tokenString = request.originalMessage.token.toString("hex");
         }
         const msgID = request.originalMessage.messageId;
-        debug(`forgetting request: token=${tokenString}; msgID=0x${msgID.toString(16)}`);
+        console.log(`forgetting request: token=${tokenString}; msgID=0x${msgID.toString(16)}`);
         // stop retransmission if neccessary
         CoapClient.stopRetransmission(request);
         // delete all references
@@ -828,7 +818,7 @@ class CoapClient {
      * Finds a request we have remembered by one of its properties
      * @param which
      */
-    static findRequest(which) {
+    static findRequest (which) {
         if (which.url != null) {
             if (CoapClient.pendingRequestsByUrl.has(which.url)) {
                 return CoapClient.pendingRequestsByUrl.get(which.url);
@@ -849,7 +839,7 @@ class CoapClient {
     /**
      * Finds all pending requests of a given origin
      */
-    static findRequestsByOrigin(origin) {
+    static findRequestsByOrigin (origin) {
         const originString = origin.toString();
         return [...CoapClient.pendingRequestsByMsgID.values()]
             .filter((req) => Origin_1.Origin.parse(req.url).toString() === originString);
@@ -858,7 +848,7 @@ class CoapClient {
      * Tries to establish a connection to the given target. Returns true on success, false otherwise.
      * @param target The target to connect to. Must be a string, NodeJS.Url or Origin and has to contain the protocol, host and port.
      */
-    static tryToConnect(target) {
+    static tryToConnect (target) {
         return __awaiter(this, void 0, void 0, function* () {
             // parse/convert url
             if (typeof target === "string") {
@@ -873,7 +863,7 @@ class CoapClient {
                 return true;
             }
             catch (e) {
-                debug(`tryToConnect(${target}) => failed with error: ${e}`);
+                console.log(`tryToConnect(${target}) => failed with error: ${e}`);
                 if (/bad_record_mac/.test(e.message)) {
                     // as of DTLSv1.2 this means we provided invalid credentials
                     return "auth failed";
@@ -893,20 +883,20 @@ class CoapClient {
      * @param origin - The other party
      * @internal
      */
-    static getConnection(origin) {
+    static getConnection (origin) {
         const originString = origin.toString();
         if (CoapClient.connections.has(originString)) {
-            debug(`getConnection(${originString}) => found existing connection`);
+            console.log(`getConnection(${originString}) => found existing connection`);
             // return existing connection
             return Promise.resolve(CoapClient.connections.get(originString));
         }
         else if (CoapClient.pendingConnections.has(originString)) {
-            debug(`getConnection(${originString}) => connection is pending`);
+            console.log(`getConnection(${originString}) => connection is pending`);
             // return the pending connection promise
             return CoapClient.pendingConnections.get(originString);
         }
         else {
-            debug(`getConnection(${originString}) => establishing new connection`);
+            console.log(`getConnection(${originString}) => establishing new connection`);
             // create a promise and start the connection queue
             const ret = DeferredPromise_1.createDeferredPromise();
             CoapClient.pendingConnections.set(originString, ret);
@@ -914,7 +904,7 @@ class CoapClient {
             return ret;
         }
     }
-    static workOffPendingConnections() {
+    static workOffPendingConnections () {
         return __awaiter(this, void 0, void 0, function* () {
             if (CoapClient.pendingConnections.size === 0) {
                 // no more pending connections, we're done
@@ -970,7 +960,7 @@ class CoapClient {
      * Establishes or retrieves a socket that can be used to send to and receive data from the given origin
      * @param origin - The other party
      */
-    static getSocket(origin) {
+    static getSocket (origin) {
         switch (origin.protocol) {
             case "coap:":
                 // simply return a normal udp socket
@@ -989,12 +979,12 @@ class CoapClient {
                 const ret = DeferredPromise_1.createDeferredPromise();
                 // try connecting
                 const onConnection = () => {
-                    debug("successfully created socket for origin " + origin.toString());
+                    console.log("successfully created socket for origin " + origin.toString());
                     sock.removeListener("error", onError);
                     ret.resolve(new SocketWrapper_1.SocketWrapper(sock));
                 };
                 const onError = (e) => {
-                    debug("socket creation for origin " + origin.toString() + " failed: " + e);
+                    console.log("socket creation for origin " + origin.toString() + " failed: " + e);
                     sock.removeListener("connected", onConnection);
                     ret.reject(e.message);
                 };
