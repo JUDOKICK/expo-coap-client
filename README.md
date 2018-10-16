@@ -1,3 +1,5 @@
+This is a react native friendly version of [node-coap-client](https://github.com/AlCalzone/node-coap-client). All the credit to [AlCalzone](https://github.com/AlCalzone).
+
 # node-coap-client
 Clientside implementation of the CoAP protocol with DTLS support
 
