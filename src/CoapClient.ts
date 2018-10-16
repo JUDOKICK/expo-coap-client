@@ -1,6 +1,6 @@
 import * as crypto from "react-native-crypto";
 import * as dgram from "react-native-udp";
-import {dtls} from "node-dtls-client";
+import {dtls} from "react-native-dtls-client";
 import * as nodeUrl from "url";
 import {ContentFormats} from "./ContentFormats";
 import {createDeferredPromise, DeferredPromise} from "./lib/DeferredPromise";

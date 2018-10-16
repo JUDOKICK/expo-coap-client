@@ -1,24 +1,24 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {value: true});
 const events_1 = require("events");
-const node_dtls_client_1 = require("node-dtls-client");
+const node_dtls_client_1 = require("react-native-dtls-client");
 class SocketWrapper extends events_1.EventEmitter {
-    constructor(socket) {
+    constructor (socket) {
         super();
         this.socket = socket;
         this.isDtls = (socket instanceof node_dtls_client_1.dtls.Socket);
         socket
             .on("message", (message, rinfo) => {
-            this.emit("message", message, rinfo);
-        })
+                this.emit("message", message, rinfo);
+            })
             .on("error", (err) => {
-            this.emit("error", err);
-        })
+                this.emit("error", err);
+            })
             .on("close", () => {
-            this.emit("close");
-        });
+                this.emit("close");
+            });
     }
-    send(msg, origin) {
+    send (msg, origin) {
         if (this.isClosed)
             return;
         if (this.isDtls) {
@@ -28,7 +28,7 @@ class SocketWrapper extends events_1.EventEmitter {
             this.socket.send(msg, origin.port, origin.hostname);
         }
     }
-    close() {
+    close () {
         if (this.isClosed)
             return;
         this.isClosed = true;
