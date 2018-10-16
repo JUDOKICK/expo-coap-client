@@ -46,8 +46,10 @@
     "url": "git+https://github.com/AlCalzone/node-coap-client.git"
   },
   "dependencies": {
-    "debug": "^3.1.0",
-    "node-dtls-client": "^0.5.4"
+    "node-dtls-client": "netbeast/react-native-dtls-client",
+    "react-native-crypto": "tradle/react-native-crypto",
+    "react-native-udp": "2.1.0",
+    "url": "^0.11.0"
   },
   "engines": {
     "node": ">= 6.0.0"
