@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", {value: true});
 const events_1 = require("events");
-const node_dtls_client_1 = require("react-native-dtls-client");
+const node_dtls_client_1 = require("expo-dtls-client");
 class SocketWrapper extends events_1.EventEmitter {
     constructor (socket) {
         super();

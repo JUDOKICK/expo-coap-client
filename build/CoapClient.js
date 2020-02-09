@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", {value: true});
 const crypto = require("react-native-crypto");
 const dgram = require("react-native-udp");
-const node_dtls_client_1 = require("react-native-dtls-client");
+const node_dtls_client_1 = require("expo-dtls-client");
 const nodeUrl = require("url");
 const ContentFormats_1 = require("./ContentFormats");
 const DeferredPromise_1 = require("./lib/DeferredPromise");

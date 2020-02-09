@@ -787,6 +787,11 @@ expand-range@^1.8.1:
   dependencies:
     fill-range "^2.1.0"
 
+expo-crypto@expo-crypto:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/expo-crypto/-/expo-crypto-8.0.0.tgz#2aeab604cfced71e4be25cd7daf01cc8c5b3dace"
+  integrity sha512-4oOJDp+3IFvLoTp5PQCeJEBtdBxqYTb9pXAtPwF9KKQCtTuWFM/OG9GQ9lmaWY+oJU8wE3WK8Oplmlf5F8tTrg==
+
 extend-shallow@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/extend-shallow/-/extend-shallow-2.0.1.tgz#51af7d614ad9a9f610ea1bafbb989d6b1c56890f"
@@ -2011,9 +2016,9 @@ react-native-crypto@tradle/react-native-crypto:
     pbkdf2 "3.0.8"
     public-encrypt "^4.0.0"
 
-react-native-dtls-client@netbeast/react-native-dtls-client:
+expo-dtls-client@JUDOKICK/expo-dtls-client:
   version "0.5.4"
-  resolved "https://codeload.github.com/netbeast/react-native-dtls-client/tar.gz/63596475fbdf44c1cd05025da4728ea596db2e8d"
+  resolved "https://codeload.github.com/JUDOKICK/react-native-dtls-client/tar.gz/63596475fbdf44c1cd05025da4728ea596db2e8d"
   dependencies:
     react-native-crypto tradle/react-native-crypto
     react-native-udp "2.1.0"
@@ -2022,6 +2027,17 @@ react-native-dtls-client@netbeast/react-native-dtls-client:
 react-native-udp@2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/react-native-udp/-/react-native-udp-2.1.0.tgz#d6704da39df280034e6a34be46c41b9b55bbfc23"
+  dependencies:
+    base64-js "0.0.8"
+    events "^1.0.2"
+    inherits "^2.0.1"
+    ip-regex "^1.0.3"
+    util "^0.10.3"
+
+react-native-udp@2.7.0:
+  version "2.7.0"
+  resolved "https://registry.yarnpkg.com/react-native-udp/-/react-native-udp-2.7.0.tgz#d04c5100fcbff343f8a2bf35a3025743d8960f93"
+  integrity sha512-tT+Wn0yLbdaTohXkGGor0HYgScGaASWCaCLSO1kCIUdNke7AtcOX5a5nfNLYrEjdUn7/2HRofuplyky7iJHSQA==
   dependencies:
     base64-js "0.0.8"
     events "^1.0.2"

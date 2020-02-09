@@ -13,7 +13,7 @@
   "types": "./build/CoapClient.d.ts",
   "author": {
     "name": "JUDOKICK",
-    "email": "d.griesel@gmx.net"
+    "email": "joshua@smarties.solutions"
   },
   "license": "MIT",
   "homepage": "https://github.com/JUDOKICK/expo-coap-client",
@@ -46,9 +46,9 @@
     "url": "git+https://github.com/JUDOKICK/expo-coap-client"
   },
   "dependencies": {
-    "react-native-dtls-client": "JUDOKICK/react-native-dtls-client",
-    "react-native-crypto": "expo-crypto",
-    "react-native-udp": "2.1.0",
+    "expo-dtls-client": "JUDOKICK/expo-dtls-client",
+    "expo-crypto": "~8.0.0",
+    "react-native-udp": "2.7.0",
     "url": "^0.11.0"
   },
   "engines": {

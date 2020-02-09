@@ -1,6 +1,6 @@
 import * as dgram from "react-native-udp";
 import {EventEmitter} from "events";
-import {dtls} from "react-native-dtls-client";
+import {dtls} from "expo-dtls-client";
 import {Origin} from "./Origin";
 
 export class SocketWrapper extends EventEmitter {
