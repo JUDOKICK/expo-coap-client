@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "expo-dtls-client": "JUDOKICK/expo-dtls-client",
-    "expo-crypto": "~8.0.0",
+    "expo-crypto": "7.0.0",
     "react-native-udp": "2.7.0",
     "url": "^0.11.0"
   },

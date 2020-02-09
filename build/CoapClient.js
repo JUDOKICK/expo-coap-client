@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", {value: true});
-const crypto = require("react-native-crypto");
+const crypto = require("expo-crypto");
 const dgram = require("react-native-udp");
 const node_dtls_client_1 = require("expo-dtls-client");
 const nodeUrl = require("url");
