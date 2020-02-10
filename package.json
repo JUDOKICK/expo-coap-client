@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "react-native-dtls-client": "JUDOKICK/react-native-dtls-client",
-    "react-native-crypto": "expo-crypto",
+    "react-native-crypto": "tradle/react-native-crypto",
     "react-native-udp": "2.1.0",
     "url": "^0.11.0"
   },
